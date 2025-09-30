@@ -9,7 +9,83 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ProductFilters } from "@/components/product-filters"
 import { ProductCard } from "@/components/product-card"
-import { generateProductReviews } from "@/lib/generate-reviews"
+import { searchRealProducts } from "@/lib/search-real-products"
+
+function generatePriceRanges(products: any[]) {
+  if (products.length === 0) {
+    return [
+      { id: "under-50", label: "Under $50", min: 0, max: 50 },
+      { id: "50-100", label: "$50 - $100", min: 50, max: 100 },
+      { id: "100-200", label: "$100 - $200", min: 100, max: 200 },
+      { id: "over-200", label: "Over $200", min: 200, max: Number.POSITIVE_INFINITY },
+    ]
+  }
+
+  const prices = products.map((p) => p.price).sort((a, b) => a - b)
+  const minPrice = Math.floor(prices[0])
+  const maxPrice = Math.ceil(prices[prices.length - 1])
+  const range = maxPrice - minPrice
+
+  // Generate 4 price buckets based on the actual price range
+  if (range < 50) {
+    // Small range (e.g., $10-$40)
+    const step = Math.ceil(range / 4)
+    return [
+      { id: "range-1", label: `Under $${minPrice + step}`, min: 0, max: minPrice + step },
+      {
+        id: "range-2",
+        label: `$${minPrice + step} - $${minPrice + step * 2}`,
+        min: minPrice + step,
+        max: minPrice + step * 2,
+      },
+      {
+        id: "range-3",
+        label: `$${minPrice + step * 2} - $${minPrice + step * 3}`,
+        min: minPrice + step * 2,
+        max: minPrice + step * 3,
+      },
+      { id: "range-4", label: `Over $${minPrice + step * 3}`, min: minPrice + step * 3, max: Number.POSITIVE_INFINITY },
+    ]
+  } else if (range < 200) {
+    // Medium range (e.g., $50-$200)
+    const step = Math.ceil(range / 4 / 10) * 10 // Round to nearest 10
+    return [
+      { id: "range-1", label: `Under $${minPrice + step}`, min: 0, max: minPrice + step },
+      {
+        id: "range-2",
+        label: `$${minPrice + step} - $${minPrice + step * 2}`,
+        min: minPrice + step,
+        max: minPrice + step * 2,
+      },
+      {
+        id: "range-3",
+        label: `$${minPrice + step * 2} - $${minPrice + step * 3}`,
+        min: minPrice + step * 2,
+        max: minPrice + step * 3,
+      },
+      { id: "range-4", label: `Over $${minPrice + step * 3}`, min: minPrice + step * 3, max: Number.POSITIVE_INFINITY },
+    ]
+  } else {
+    // Large range (e.g., $100-$1000+)
+    const step = Math.ceil(range / 4 / 50) * 50 // Round to nearest 50
+    return [
+      { id: "range-1", label: `Under $${minPrice + step}`, min: 0, max: minPrice + step },
+      {
+        id: "range-2",
+        label: `$${minPrice + step} - $${minPrice + step * 2}`,
+        min: minPrice + step,
+        max: minPrice + step * 2,
+      },
+      {
+        id: "range-3",
+        label: `$${minPrice + step * 2} - $${minPrice + step * 3}`,
+        min: minPrice + step * 2,
+        max: minPrice + step * 3,
+      },
+      { id: "range-4", label: `Over $${minPrice + step * 3}`, min: minPrice + step * 3, max: Number.POSITIVE_INFINITY },
+    ]
+  }
+}
 
 function SearchResults() {
   const searchParams = useSearchParams()
@@ -19,12 +95,18 @@ function SearchResults() {
   const [searchQuery, setSearchQuery] = useState(query)
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     priceRange: "all",
     brands: [] as string[],
     minRating: 0,
   })
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    router.push(`/search?q=${searchQuery}`)
+  }
 
   useEffect(() => {
     if (query) {
@@ -34,31 +116,32 @@ function SearchResults() {
 
   const loadProducts = async (searchQuery: string) => {
     setLoading(true)
+    setError(null)
     try {
-      const results = await generateProductReviews(searchQuery)
+      console.log("[v0] Searching for real products:", searchQuery)
+      const results = await searchRealProducts(searchQuery)
+      console.log("[v0] Found products:", results.length)
       setProducts(results)
     } catch (error) {
-      console.error("Error loading products:", error)
+      console.error("[v0] Error loading products:", error)
+      setError("Failed to load products. Please try again.")
     } finally {
       setLoading(false)
     }
   }
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-    }
-  }
+  const priceRanges = generatePriceRanges(products)
 
   const filteredProducts = products.filter((product) => {
     // Price filter
     if (filters.priceRange !== "all") {
-      const price = product.price
-      if (filters.priceRange === "under-50" && price >= 50) return false
-      if (filters.priceRange === "50-100" && (price < 50 || price >= 100)) return false
-      if (filters.priceRange === "100-200" && (price < 100 || price >= 200)) return false
-      if (filters.priceRange === "over-200" && price < 200) return false
+      const selectedRange = priceRanges.find((r) => r.id === filters.priceRange)
+      if (selectedRange) {
+        const price = product.price
+        if (price < selectedRange.min || price >= selectedRange.max) {
+          return false
+        }
+      }
     }
 
     // Brand filter
@@ -118,7 +201,12 @@ function SearchResults() {
         <div className="flex gap-6">
           {/* Filters Sidebar */}
           <aside className={`${showFilters ? "block" : "hidden"} md:block w-full md:w-64 shrink-0`}>
-            <ProductFilters filters={filters} onFiltersChange={setFilters} availableBrands={availableBrands} />
+            <ProductFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              availableBrands={availableBrands}
+              priceRanges={priceRanges}
+            />
           </aside>
 
           {/* Results */}
@@ -127,8 +215,14 @@ function SearchResults() {
               <div className="flex items-center justify-center py-24">
                 <div className="text-center space-y-4">
                   <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                  <p className="text-muted-foreground">Analyzing products...</p>
+                  <p className="text-muted-foreground">Searching for real products across the web...</p>
+                  <p className="text-sm text-muted-foreground">This may take a moment...</p>
                 </div>
+              </div>
+            ) : error ? (
+              <div className="text-center py-24">
+                <p className="text-destructive mb-4">{error}</p>
+                <Button onClick={() => loadProducts(query)}>Try Again</Button>
               </div>
             ) : (
               <>

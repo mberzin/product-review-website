@@ -6,6 +6,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
 import { Card } from "@/components/ui/card"
 
+interface PriceRange {
+  id: string
+  label: string
+  min: number
+  max: number
+}
+
 interface ProductFiltersProps {
   filters: {
     priceRange: string
@@ -14,9 +21,10 @@ interface ProductFiltersProps {
   }
   onFiltersChange: (filters: any) => void
   availableBrands: string[]
+  priceRanges: PriceRange[]
 }
 
-export function ProductFilters({ filters, onFiltersChange, availableBrands }: ProductFiltersProps) {
+export function ProductFilters({ filters, onFiltersChange, availableBrands, priceRanges }: ProductFiltersProps) {
   const updateFilter = (key: string, value: any) => {
     onFiltersChange({ ...filters, [key]: value })
   }
@@ -44,30 +52,14 @@ export function ProductFilters({ filters, onFiltersChange, availableBrands }: Pr
               All Prices
             </Label>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="under-50" id="under-50" />
-            <Label htmlFor="under-50" className="font-normal cursor-pointer">
-              Under $50
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="50-100" id="50-100" />
-            <Label htmlFor="50-100" className="font-normal cursor-pointer">
-              $50 - $100
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="100-200" id="100-200" />
-            <Label htmlFor="100-200" className="font-normal cursor-pointer">
-              $100 - $200
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="over-200" id="over-200" />
-            <Label htmlFor="over-200" className="font-normal cursor-pointer">
-              Over $200
-            </Label>
-          </div>
+          {priceRanges.map((range) => (
+            <div key={range.id} className="flex items-center space-x-2">
+              <RadioGroupItem value={range.id} id={range.id} />
+              <Label htmlFor={range.id} className="font-normal cursor-pointer">
+                {range.label}
+              </Label>
+            </div>
+          ))}
         </RadioGroup>
       </div>
 
