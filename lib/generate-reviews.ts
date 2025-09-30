@@ -1,0 +1,151 @@
+export async function generateProductReviews(query: string) {
+  // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 1500))
+
+  // Mock product data - in production, this would call an AI API
+  const mockProducts = [
+    {
+      name: "Premium Wireless Headphones Pro",
+      brand: "AudioTech",
+      price: 299,
+      rating: 4.8,
+      image: "/premium-wireless-headphones.png",
+      summary:
+        "Industry-leading noise cancellation with exceptional sound quality and 30-hour battery life. Perfect for audiophiles and frequent travelers.",
+      pros: [
+        "Outstanding noise cancellation",
+        "Exceptional audio quality",
+        "Long battery life (30 hours)",
+        "Comfortable for extended wear",
+      ],
+      cons: ["Premium price point", "Slightly bulky design"],
+      vendor: "Amazon",
+      vendorUrl: "https://amazon.com",
+    },
+    {
+      name: "Studio Sound Elite",
+      brand: "SoundWave",
+      price: 249,
+      rating: 4.6,
+      image: "/studio-headphones.png",
+      summary:
+        "Professional-grade headphones with studio-quality sound reproduction. Ideal for music production and critical listening.",
+      pros: ["Accurate sound reproduction", "Durable build quality", "Detachable cable", "Great value for money"],
+      cons: ["No wireless option", "Limited noise cancellation"],
+      vendor: "Walmart",
+      vendorUrl: "https://walmart.com",
+    },
+    {
+      name: "Active Noise Cancelling Wireless",
+      brand: "TechSound",
+      price: 179,
+      rating: 4.5,
+      image: "/noise-cancelling-headphones.png",
+      summary:
+        "Affordable noise-cancelling headphones with solid performance. Great for daily commutes and office use.",
+      pros: ["Affordable price", "Good noise cancellation", "Lightweight design", "Quick charge feature"],
+      cons: ["Average battery life (20 hours)", "Plastic build feels less premium"],
+      vendor: "Amazon",
+      vendorUrl: "https://amazon.com",
+    },
+    {
+      name: "Sport Wireless Pro",
+      brand: "FitAudio",
+      price: 149,
+      rating: 4.4,
+      image: "/sport-wireless-headphones.jpg",
+      summary:
+        "Designed for active lifestyles with sweat resistance and secure fit. Perfect for workouts and outdoor activities.",
+      pros: ["IPX7 water resistance", "Secure fit for sports", "Good sound quality", "Affordable"],
+      cons: ["Limited noise cancellation", "Shorter battery life (15 hours)"],
+      vendor: "Dick's Sporting Goods",
+      vendorUrl: "https://dickssportinggoods.com",
+    },
+    {
+      name: "Budget Wireless Comfort",
+      brand: "ValueSound",
+      price: 79,
+      rating: 4.2,
+      image: "/budget-wireless-headphones.jpg",
+      summary: "Entry-level wireless headphones with decent sound quality. Great for casual listening on a budget.",
+      pros: ["Very affordable", "Comfortable fit", "Decent sound for the price", "Long battery life (25 hours)"],
+      cons: ["No noise cancellation", "Basic build quality", "Limited bass response"],
+      vendor: "Walmart",
+      vendorUrl: "https://walmart.com",
+    },
+    {
+      name: "Premium Over-Ear Studio",
+      brand: "AudioTech",
+      price: 399,
+      rating: 4.9,
+      image: "/premium-over-ear-headphones.jpg",
+      summary:
+        "Flagship model with cutting-edge technology and premium materials. The ultimate choice for serious audiophiles.",
+      pros: [
+        "Best-in-class sound quality",
+        "Premium materials and build",
+        "Advanced noise cancellation",
+        "Spatial audio support",
+      ],
+      cons: ["Expensive", "Heavy for extended use"],
+      vendor: "Amazon",
+      vendorUrl: "https://amazon.com",
+    },
+    {
+      name: "Compact Foldable Wireless",
+      brand: "TravelSound",
+      price: 129,
+      rating: 4.3,
+      image: "/compact-foldable-headphones.jpg",
+      summary: "Ultra-portable design that folds into a compact case. Perfect for travelers who value convenience.",
+      pros: ["Extremely portable", "Includes hard case", "Good sound quality", "Affordable"],
+      cons: ["Smaller drivers affect bass", "Average noise cancellation"],
+      vendor: "Amazon",
+      vendorUrl: "https://amazon.com",
+    },
+    {
+      name: "Gaming Wireless Pro",
+      brand: "GameAudio",
+      price: 199,
+      rating: 4.7,
+      image: "/gaming-wireless-headphones.jpg",
+      summary: "Optimized for gaming with low latency and immersive surround sound. Also great for music and movies.",
+      pros: [
+        "Low latency for gaming",
+        "Virtual surround sound",
+        "Comfortable for long sessions",
+        "Detachable microphone",
+      ],
+      cons: ["Gaming-focused design", "Shorter battery (18 hours)"],
+      vendor: "Amazon",
+      vendorUrl: "https://amazon.com",
+    },
+    {
+      name: "Eco-Friendly Sustainable",
+      brand: "GreenSound",
+      price: 159,
+      rating: 4.4,
+      image: "/eco-friendly-headphones.jpg",
+      summary: "Made from recycled materials with carbon-neutral shipping. Great sound with a conscience.",
+      pros: ["Sustainable materials", "Good sound quality", "Comfortable design", "Supports environmental causes"],
+      cons: ["Limited color options", "No premium features"],
+      vendor: "Amazon",
+      vendorUrl: "https://amazon.com",
+    },
+    {
+      name: "Kids Safe Volume Wireless",
+      brand: "KidSound",
+      price: 59,
+      rating: 4.5,
+      image: "/kids-wireless-headphones.jpg",
+      summary: "Designed specifically for children with volume limiting to protect hearing. Durable and colorful.",
+      pros: ["Volume limiting for safety", "Durable construction", "Fun colors", "Very affordable"],
+      cons: ["Basic sound quality", "Limited features", "Smaller size not for adults"],
+      vendor: "Walmart",
+      vendorUrl: "https://walmart.com",
+    },
+  ]
+
+  // Return top 10 products
+  return mockProducts.slice(0, 10)
+}
