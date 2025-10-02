@@ -22,10 +22,9 @@ export interface RealProduct {
 }
 
 function getProductImageUrl(productName: string, category: string): string {
-  // Use Unsplash's source API for free, high-quality product images
-  // The query combines product name and category for better results
-  const query = encodeURIComponent(`${category} ${productName}`)
-  return `https://source.unsplash.com/400x400/?${query}`
+  // Use placeholder.co which is reliable and always works
+  const text = encodeURIComponent(productName.substring(0, 30))
+  return `https://placehold.co/400x400/e2e8f0/1e293b?text=${text}&font=roboto`
 }
 
 function createProductLinks(productName: string, basePrice: number) {
@@ -53,10 +52,7 @@ function createProductLinks(productName: string, basePrice: number) {
 function generateProductsForQuery(query: string): RealProduct[] {
   console.log("[v0] Generating products for query:", query)
 
-  // Parse query to understand product category and context
   const queryLower = query.toLowerCase()
-
-  // Define category-specific data
   const categoryData = getCategoryData(queryLower)
 
   const products: RealProduct[] = []
@@ -69,9 +65,7 @@ function generateProductsForQuery(query: string): RealProduct[] {
     const rating = Number((Math.random() * 1.5 + 3.5).toFixed(1))
     const reviewCount = Math.floor(Math.random() * 5000) + 100
 
-    // Generate product name with model variation
-    const modelSuffix = categoryData.modelSuffixes[i % categoryData.modelSuffixes.length]
-    const productName = `${brand} ${categoryData.productType} ${modelSuffix}`
+    const productName = categoryData.productNames[i % categoryData.productNames.length]
 
     products.push({
       id: `product-${i + 1}`,
@@ -93,13 +87,23 @@ function generateProductsForQuery(query: string): RealProduct[] {
 }
 
 function getCategoryData(query: string) {
-  // Electronics categories
   if (query.includes("headphone") || query.includes("earbuds") || query.includes("airpods")) {
     return {
       productType: "Wireless Headphones",
       brands: ["Sony", "Bose", "Apple", "Sennheiser", "JBL", "Beats", "Audio-Technica", "Anker", "Jabra", "Samsung"],
       priceRange: { min: 49, max: 399 },
-      modelSuffixes: ["Pro", "Elite", "Max", "Ultra", "Premium", "Studio", "Sport", "Plus", "Air", "X"],
+      productNames: [
+        "Sony WH-1000XM5",
+        "Bose QuietComfort Ultra",
+        "Apple AirPods Max",
+        "Sennheiser Momentum 4",
+        "JBL Live 660NC",
+        "Beats Studio Pro",
+        "Audio-Technica ATH-M50xBT2",
+        "Anker Soundcore Space Q45",
+        "Jabra Elite 85h",
+        "Samsung Galaxy Buds2 Pro",
+      ],
       summaryTemplate:
         "Premium {product} from {brand} featuring exceptional sound quality, active noise cancellation, and long battery life. Perfect for music lovers and professionals.",
       pros: [
@@ -130,17 +134,17 @@ function getCategoryData(query: string) {
       productType: "Laptop",
       brands: ["Apple", "Dell", "HP", "Lenovo", "ASUS", "Acer", "Microsoft", "MSI", "Razer", "LG"],
       priceRange: { min: 599, max: 2499 },
-      modelSuffixes: [
-        "Pro 15",
-        "Elite X360",
-        "Spectre 14",
-        "ThinkPad X1",
-        "ZenBook 14",
-        "Swift 5",
-        "Surface Laptop 5",
-        "Prestige 16",
-        "Blade 15",
-        "Gram 17",
+      productNames: [
+        "Apple MacBook Pro 14",
+        "Dell XPS 15",
+        "HP Spectre x360 14",
+        "Lenovo ThinkPad X1 Carbon Gen 11",
+        "ASUS ZenBook 14 OLED",
+        "Acer Swift 5",
+        "Microsoft Surface Laptop 5",
+        "MSI Prestige 16",
+        "Razer Blade 15",
+        "LG Gram 17",
       ],
       summaryTemplate:
         "High-performance {product} from {brand} designed for productivity and entertainment. Features powerful processors, stunning display, and all-day battery life.",
@@ -177,17 +181,17 @@ function getCategoryData(query: string) {
       productType: "Smartphone",
       brands: ["Apple", "Samsung", "Google", "OnePlus", "Motorola", "Xiaomi", "OPPO", "Sony", "Nokia", "ASUS"],
       priceRange: { min: 299, max: 1299 },
-      modelSuffixes: [
-        "Pro Max",
-        "Ultra",
-        "Pro",
-        "Plus",
-        "Edge",
-        "Pixel 8",
-        "13 Pro",
-        "Xperia 5",
-        "G Power",
-        "ROG Phone",
+      productNames: [
+        "Apple iPhone 15 Pro Max",
+        "Samsung Galaxy S24 Ultra",
+        "Google Pixel 8 Pro",
+        "OnePlus 12",
+        "Motorola Edge 40 Pro",
+        "Xiaomi 14 Pro",
+        "OPPO Find X7",
+        "Sony Xperia 1 V",
+        "Nokia XR21",
+        "ASUS ROG Phone 8 Pro",
       ],
       summaryTemplate:
         "Cutting-edge {product} from {brand} with advanced camera system, powerful processor, and stunning display. Perfect for photography, gaming, and productivity.",
@@ -214,7 +218,6 @@ function getCategoryData(query: string) {
     }
   }
 
-  // Sports & Outdoors
   if (query.includes("golf") && (query.includes("bag") || query.includes("bags"))) {
     return {
       productType: "Golf Bag",
@@ -231,17 +234,17 @@ function getCategoryData(query: string) {
         "Bag Boy",
       ],
       priceRange: { min: 89, max: 399 },
-      modelSuffixes: [
-        "Stand Bag",
-        "Cart Bag",
-        "Tour Bag",
-        "Carry Bag",
-        "Hybrid 14",
-        "Superlight",
-        "Org 14",
-        "Chiller",
-        "Mavrik",
-        "Sync",
+      productNames: [
+        "Callaway Fairway 14 Stand Bag",
+        "TaylorMade FlexTech Crossover",
+        "Titleist Players 4 Plus StaDry",
+        "Ping Hoofer 14",
+        "Sun Mountain C-130 Cart Bag",
+        "Cobra Ultralight Cart Bag",
+        "Mizuno BR-D4 Stand Bag",
+        "Wilson Staff Dry Tech II Cart Bag",
+        "Cleveland CG Stand Bag",
+        "Bag Boy Chiller Cart Bag",
       ],
       summaryTemplate:
         "Professional-grade {product} from {brand} featuring multiple pockets, durable construction, and comfortable carrying system. Ideal for serious golfers.",
@@ -284,17 +287,17 @@ function getCategoryData(query: string) {
         "Spy",
       ],
       priceRange: { min: 79, max: 399 },
-      modelSuffixes: [
-        "Aviator",
-        "Wayfarer",
-        "Clubmaster",
-        "Polarized",
-        "Sport",
-        "Classic",
-        "Oversized",
-        "Round",
-        "Square",
-        "Cat Eye",
+      productNames: [
+        "Ray-Ban Aviator Classic",
+        "Oakley Holbrook",
+        "Maui Jim Peahi",
+        "Costa Del Mar Blackfin",
+        "Persol PO3019S",
+        "Warby Parker Haskell",
+        "Gucci GG0061S",
+        "Prada Linea Rossa",
+        "Tom Ford Marko",
+        "Spy Optic Discord",
       ],
       summaryTemplate:
         "Stylish {product} from {brand} offering 100% UV protection, premium lenses, and comfortable fit. Perfect for outdoor activities and everyday wear.",
@@ -337,17 +340,17 @@ function getCategoryData(query: string) {
         "Under Armour",
       ],
       priceRange: { min: 89, max: 249 },
-      modelSuffixes: [
-        "Pegasus 40",
-        "Ultraboost 23",
-        "Ghost 15",
-        "Gel-Nimbus 25",
-        "Fresh Foam X",
-        "Clifton 9",
-        "Ride 16",
-        "Wave Rider 27",
-        "Cloudmonster",
-        "Flow Velociti",
+      productNames: [
+        "Nike Air Zoom Pegasus 40",
+        "Adidas Ultraboost 23",
+        "Brooks Ghost 15",
+        "ASICS Gel-Nimbus 25",
+        "New Balance Fresh Foam X 1080v13",
+        "Hoka Clifton 9",
+        "Saucony Ride 16",
+        "Mizuno Wave Rider 27",
+        "On Cloudmonster",
+        "Under Armour Flow Velociti Wind 2",
       ],
       summaryTemplate:
         "High-performance {product} from {brand} designed for comfort, support, and durability. Features responsive cushioning and breathable materials.",
@@ -374,7 +377,6 @@ function getCategoryData(query: string) {
     }
   }
 
-  // Home & Kitchen
   if (query.includes("coffee") && (query.includes("maker") || query.includes("machine"))) {
     return {
       productType: "Coffee Maker",
@@ -391,17 +393,17 @@ function getCategoryData(query: string) {
         "Bonavita",
       ],
       priceRange: { min: 49, max: 399 },
-      modelSuffixes: [
-        "Barista Express",
-        "Brew Central",
-        "K-Elite",
-        "Specialty",
-        "12-Cup",
-        "FlexBrew",
-        "Magnifica",
-        "VertuoPlus",
-        "Moccamaster",
-        "Connoisseur",
+      productNames: [
+        "Breville Barista Express",
+        "Cuisinart DCC-3200P1",
+        "Keurig K-Elite",
+        "Ninja Specialty Coffee Maker",
+        "Mr. Coffee 12-Cup Programmable",
+        "Hamilton Beach FlexBrew",
+        "De'Longhi Magnifica S",
+        "Nespresso VertuoPlus",
+        "Technivorm Moccamaster",
+        "Bonavita Connoisseur",
       ],
       summaryTemplate:
         "Premium {product} from {brand} delivering barista-quality coffee at home. Features programmable settings and easy-to-use controls.",
@@ -428,7 +430,6 @@ function getCategoryData(query: string) {
     }
   }
 
-  // Default fallback for any other query
   return {
     productType: query
       .split(" ")
@@ -447,7 +448,18 @@ function getCategoryData(query: string) {
       "LeaderCo",
     ],
     priceRange: { min: 49, max: 299 },
-    modelSuffixes: ["Pro", "Elite", "Max", "Ultra", "Premium", "Plus", "Advanced", "Deluxe", "Professional", "Expert"],
+    productNames: [
+      "Premium Pro Model X1",
+      "Elite Series 2024",
+      "ProTech Advanced Plus",
+      "MaxPro Ultra Edition",
+      "UltraGear Premium",
+      "TopChoice Professional",
+      "BestValue Deluxe",
+      "QualityFirst Expert",
+      "TrustedName Elite",
+      "LeaderCo Pro Max",
+    ],
     summaryTemplate:
       "High-quality {product} from {brand} featuring advanced technology and excellent performance. Perfect for both casual and professional use.",
     pros: [
@@ -479,36 +491,37 @@ export async function searchRealProducts(query: string): Promise<RealProduct[]> 
 
     const { text } = await generateText({
       model: "groq/llama-3.1-70b-versatile",
-      prompt: `You are a product research expert. Generate a JSON array of 10 realistic product recommendations for: "${query}"
+      prompt: `You are a product research expert with knowledge of current products available in 2024-2025. Generate a JSON array of 10 realistic product recommendations for: "${query}"
+
+IMPORTANT: Use actual current product model names that exist in the market (e.g., "Apple iPhone 15 Pro Max", "Samsung Galaxy S24 Ultra", "Sony WH-1000XM5", not generic names like "Apple Smartphone Pro" or "Sony Headphones Elite").
 
 Each product should include:
-- id: unique identifier
-- name: full product name with brand and model
-- brand: manufacturer name
-- price: realistic price in USD (number)
+- id: unique identifier (string)
+- name: ACTUAL full product name with real brand and specific model number/name (e.g., "Apple iPhone 15 Pro Max", not "Apple Smartphone Pro")
+- brand: manufacturer name (string)
+- price: realistic current market price in USD (number)
 - rating: rating out of 5 (number between 3.5 and 5.0)
 - reviewCount: number of reviews (number between 100 and 5000)
-- summary: 2-3 sentence product description
-- pros: array of 4-5 positive features
-- cons: array of 2-3 drawbacks
-- keyFeatures: array of 5-7 technical specifications
+- summary: 2-3 sentence product description highlighting key benefits
+- pros: array of 4-5 specific positive features
+- cons: array of 2-3 realistic drawbacks
+- keyFeatures: array of 5-7 specific technical specifications
 
-Important:
-- Use real brand names appropriate for the product category
-- Prices should be realistic for the product type
+Requirements:
+- Use REAL product model names that currently exist (2024-2025 models)
+- Use actual brand names appropriate for the product category
+- Prices should reflect current market prices
 - Include variety in brands, prices, and features
-- Make the data realistic and helpful for comparison
+- Make the data realistic and helpful for comparison shopping
 
-Return ONLY valid JSON array, no markdown formatting or explanation.`,
+Return ONLY a valid JSON array with no markdown formatting, code blocks, or explanation.`,
       temperature: 0.7,
     })
 
     console.log("[v0] Groq AI response received")
 
-    // Parse the AI response
     const aiProducts = JSON.parse(text)
-
-    const category = query.split(" ").slice(-1)[0] // Use last word as category hint
+    const category = query.split(" ").slice(-1)[0]
 
     const products: RealProduct[] = aiProducts.map((product: any, index: number) => {
       return {
