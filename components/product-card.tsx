@@ -9,12 +9,16 @@ interface ProductCardProps {
     brand: string
     price: number
     rating: number
+    reviewCount: number
     image: string
     summary: string
     pros: string[]
     cons: string[]
-    vendor: string
-    vendorUrl: string
+    affiliateLinks: {
+      vendor: string
+      url: string
+      price: number
+    }[]
   }
   rank: number
 }
@@ -32,7 +36,15 @@ export function ProductCard({ product, rank }: ProductCardProps) {
 
         {/* Product Image */}
         <div className="w-full md:w-48 h-48 bg-muted rounded-lg overflow-hidden shrink-0">
-          <img src={product.image || "/placeholder.svg"} alt={product.name} className="w-full h-full object-cover" />
+          <img
+            src={product.image || "/placeholder.svg"}
+            alt={product.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to a generic placeholder if image fails to load
+              e.currentTarget.src = `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(product.name)}`
+            }}
+          />
         </div>
 
         {/* Product Details */}
@@ -52,6 +64,7 @@ export function ProductCard({ product, rank }: ProductCardProps) {
                   <span className="font-medium">{product.rating.toFixed(1)}</span>
                   <span className="text-muted-foreground">/5.0</span>
                 </div>
+                <div className="text-xs text-muted-foreground mt-1">{product.reviewCount.toLocaleString()} reviews</div>
               </div>
             </div>
             <p className="text-muted-foreground leading-relaxed">{product.summary}</p>
@@ -82,14 +95,18 @@ export function ProductCard({ product, rank }: ProductCardProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 pt-2">
-            <Button asChild className="gap-2">
-              <a href={product.vendorUrl} target="_blank" rel="noopener noreferrer">
-                View on {product.vendor}
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </Button>
-            <span className="text-sm text-muted-foreground">Best price available</span>
+          <div className="pt-2">
+            <h4 className="font-semibold text-sm mb-3">Where to Buy:</h4>
+            <div className="flex flex-wrap gap-3">
+              {product.affiliateLinks.map((link, index) => (
+                <Button key={index} asChild variant={index === 0 ? "default" : "outline"} className="gap-2">
+                  <a href={link.url} target="_blank" rel="noopener noreferrer">
+                    {link.vendor} - ${link.price}
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
