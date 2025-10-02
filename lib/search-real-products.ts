@@ -21,6 +21,35 @@ export interface RealProduct {
   }[]
 }
 
+function getProductImageUrl(productName: string, category: string): string {
+  // Use Unsplash's source API for free, high-quality product images
+  // The query combines product name and category for better results
+  const query = encodeURIComponent(`${category} ${productName}`)
+  return `https://source.unsplash.com/400x400/?${query}`
+}
+
+function createProductLinks(productName: string, basePrice: number) {
+  const encodedName = encodeURIComponent(productName)
+
+  return [
+    {
+      vendor: "Amazon",
+      url: `https://www.amazon.com/s?k=${encodedName}`,
+      price: basePrice,
+    },
+    {
+      vendor: "Walmart",
+      url: `https://www.walmart.com/search?q=${encodedName}`,
+      price: Math.floor(basePrice * 0.95),
+    },
+    {
+      vendor: "Best Buy",
+      url: `https://www.bestbuy.com/site/searchpage.jsp?st=${encodedName}`,
+      price: Math.floor(basePrice * 1.02),
+    },
+  ]
+}
+
 function generateProductsForQuery(query: string): RealProduct[] {
   console.log("[v0] Generating products for query:", query)
 
@@ -40,22 +69,9 @@ function generateProductsForQuery(query: string): RealProduct[] {
     const rating = Number((Math.random() * 1.5 + 3.5).toFixed(1))
     const reviewCount = Math.floor(Math.random() * 5000) + 100
 
-    // Generate realistic product identifiers
-    const amazonAsin = `B0${Math.random().toString(36).substring(2, 9).toUpperCase()}`
-    const walmartId = Math.floor(Math.random() * 900000000) + 100000000
-
-    const amazonAffiliateId = process.env.AMAZON_AFFILIATE_ID || "youraffid-20"
-    const walmartAffiliateId = process.env.WALMART_AFFILIATE_ID || ""
-
     // Generate product name with model variation
     const modelSuffix = categoryData.modelSuffixes[i % categoryData.modelSuffixes.length]
     const productName = `${brand} ${categoryData.productType} ${modelSuffix}`
-
-    // Build Walmart URL with optional affiliate ID
-    let walmartUrl = `https://www.walmart.com/ip/${walmartId}`
-    if (walmartAffiliateId) {
-      walmartUrl += `?affcamid=${walmartAffiliateId}`
-    }
 
     products.push({
       id: `product-${i + 1}`,
@@ -64,28 +80,12 @@ function generateProductsForQuery(query: string): RealProduct[] {
       price: basePrice,
       rating: rating,
       reviewCount: reviewCount,
-      image: `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(productName)}`,
+      image: getProductImageUrl(productName, categoryData.productType),
       summary: categoryData.summaryTemplate.replace("{brand}", brand).replace("{product}", categoryData.productType),
       pros: categoryData.pros.slice(i % 3, (i % 3) + 4),
       cons: categoryData.cons.slice(i % 2, (i % 2) + 3),
       keyFeatures: categoryData.features.slice(i % 2, (i % 2) + 5),
-      affiliateLinks: [
-        {
-          vendor: "Amazon",
-          url: `https://www.amazon.com/dp/${amazonAsin}?tag=${amazonAffiliateId}`,
-          price: basePrice,
-        },
-        {
-          vendor: "Walmart",
-          url: walmartUrl,
-          price: Math.floor(basePrice * 0.95),
-        },
-        {
-          vendor: "Best Buy",
-          url: `https://www.bestbuy.com/site/${walmartId}.p`,
-          price: Math.floor(basePrice * 1.02),
-        },
-      ],
+      affiliateLinks: createProductLinks(productName, basePrice),
     })
   }
 
@@ -508,39 +508,14 @@ Return ONLY valid JSON array, no markdown formatting or explanation.`,
     // Parse the AI response
     const aiProducts = JSON.parse(text)
 
+    const category = query.split(" ").slice(-1)[0] // Use last word as category hint
+
     const products: RealProduct[] = aiProducts.map((product: any, index: number) => {
-      const amazonAsin = `B0${Math.random().toString(36).substring(2, 9).toUpperCase()}`
-      const walmartId = Math.floor(Math.random() * 900000000) + 100000000
-
-      const amazonAffiliateId = process.env.AMAZON_AFFILIATE_ID || "youraffid-20"
-      const walmartAffiliateId = process.env.WALMART_AFFILIATE_ID || ""
-
-      let walmartUrl = `https://www.walmart.com/ip/${walmartId}`
-      if (walmartAffiliateId) {
-        walmartUrl += `?affcamid=${walmartAffiliateId}`
-      }
-
       return {
         ...product,
         id: product.id || `product-${index + 1}`,
-        image: `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(product.name)}`,
-        affiliateLinks: [
-          {
-            vendor: "Amazon",
-            url: `https://www.amazon.com/dp/${amazonAsin}?tag=${amazonAffiliateId}`,
-            price: product.price,
-          },
-          {
-            vendor: "Walmart",
-            url: walmartUrl,
-            price: Math.floor(product.price * 0.95),
-          },
-          {
-            vendor: "Best Buy",
-            url: `https://www.bestbuy.com/site/${walmartId}.p`,
-            price: Math.floor(product.price * 1.02),
-          },
-        ],
+        image: getProductImageUrl(product.name, category),
+        affiliateLinks: createProductLinks(product.name, product.price),
       }
     })
 
