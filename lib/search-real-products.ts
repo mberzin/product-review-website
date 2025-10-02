@@ -21,32 +21,91 @@ export interface RealProduct {
   }[]
 }
 
-function getProductImageUrl(productName: string, category: string): string {
-  // Use placeholder.co which is reliable and always works
-  const text = encodeURIComponent(productName.substring(0, 30))
-  return `https://placehold.co/400x400/e2e8f0/1e293b?text=${text}&font=roboto`
+function getProductImageUrl(productName: string): string {
+  const query = encodeURIComponent(productName)
+  return `/placeholder.svg?height=400&width=400&query=${query}`
 }
 
-function createProductLinks(productName: string, basePrice: number) {
-  const encodedName = encodeURIComponent(productName)
+function getVendorsForCategory(query: string): string[] {
+  const queryLower = query.toLowerCase()
 
-  return [
-    {
+  // Electronics - all three vendors
+  if (
+    queryLower.includes("laptop") ||
+    queryLower.includes("phone") ||
+    queryLower.includes("headphone") ||
+    queryLower.includes("tablet") ||
+    queryLower.includes("camera") ||
+    queryLower.includes("tv") ||
+    queryLower.includes("speaker") ||
+    queryLower.includes("smartwatch")
+  ) {
+    return ["Amazon", "Walmart", "Best Buy"]
+  }
+
+  // Appliances - all three vendors
+  if (
+    queryLower.includes("coffee") ||
+    queryLower.includes("blender") ||
+    queryLower.includes("microwave") ||
+    queryLower.includes("vacuum") ||
+    queryLower.includes("air fryer")
+  ) {
+    return ["Amazon", "Walmart", "Best Buy"]
+  }
+
+  // Sporting goods - Amazon and Walmart only (Best Buy doesn't sell sports equipment)
+  if (
+    queryLower.includes("golf") ||
+    queryLower.includes("running") ||
+    queryLower.includes("fitness") ||
+    queryLower.includes("yoga") ||
+    queryLower.includes("tennis") ||
+    queryLower.includes("basketball") ||
+    queryLower.includes("soccer")
+  ) {
+    return ["Amazon", "Walmart"]
+  }
+
+  // Fashion/accessories - Amazon and Walmart only
+  if (
+    queryLower.includes("sunglasses") ||
+    queryLower.includes("watch") ||
+    queryLower.includes("bag") ||
+    queryLower.includes("backpack") ||
+    queryLower.includes("clothing") ||
+    (queryLower.includes("shoes") && !queryLower.includes("running"))
+  ) {
+    return ["Amazon", "Walmart"]
+  }
+
+  // Default to Amazon and Walmart for unknown categories
+  return ["Amazon", "Walmart"]
+}
+
+function createProductLinks(productName: string, basePrice: number, query: string) {
+  const encodedName = encodeURIComponent(productName)
+  const vendors = getVendorsForCategory(query)
+
+  const allVendorLinks = {
+    Amazon: {
       vendor: "Amazon",
       url: `https://www.amazon.com/s?k=${encodedName}`,
       price: basePrice,
     },
-    {
+    Walmart: {
       vendor: "Walmart",
       url: `https://www.walmart.com/search?q=${encodedName}`,
       price: Math.floor(basePrice * 0.95),
     },
-    {
+    "Best Buy": {
       vendor: "Best Buy",
       url: `https://www.bestbuy.com/site/searchpage.jsp?st=${encodedName}`,
       price: Math.floor(basePrice * 1.02),
     },
-  ]
+  }
+
+  return vendors.map((vendor) => allVendorLinks[vendor as keyof typeof allVendorLinks])
 }
 
 function generateProductsForQuery(query: string): RealProduct[] {
@@ -74,12 +133,12 @@ function generateProductsForQuery(query: string): RealProduct[] {
       price: basePrice,
       rating: rating,
       reviewCount: reviewCount,
-      image: getProductImageUrl(productName, categoryData.productType),
+      image: getProductImageUrl(productName),
       summary: categoryData.summaryTemplate.replace("{brand}", brand).replace("{product}", categoryData.productType),
       pros: categoryData.pros.slice(i % 3, (i % 3) + 4),
       cons: categoryData.cons.slice(i % 2, (i % 2) + 3),
       keyFeatures: categoryData.features.slice(i % 2, (i % 2) + 5),
-      affiliateLinks: createProductLinks(productName, basePrice),
+      affiliateLinks: createProductLinks(productName, basePrice, query),
     })
   }
 
@@ -489,6 +548,9 @@ export async function searchRealProducts(query: string): Promise<RealProduct[]> 
   try {
     console.log("[v0] Searching for products using Groq AI:", query)
 
+    const vendors = getVendorsForCategory(query)
+    const vendorList = vendors.join(", ")
+
     const { text } = await generateText({
       model: "groq/llama-3.1-70b-versatile",
       prompt: `You are a product research expert with knowledge of current products available in 2024-2025. Generate a JSON array of 10 realistic product recommendations for: "${query}"
@@ -513,6 +575,7 @@ Requirements:
 - Prices should reflect current market prices
 - Include variety in brands, prices, and features
 - Make the data realistic and helpful for comparison shopping
+- These products should be available at: ${vendorList}
 
 Return ONLY a valid JSON array with no markdown formatting, code blocks, or explanation.`,
       temperature: 0.7,
@@ -521,14 +584,13 @@ Return ONLY a valid JSON array with no markdown formatting, code blocks, or expl
     console.log("[v0] Groq AI response received")
 
     const aiProducts = JSON.parse(text)
-    const category = query.split(" ").slice(-1)[0]
 
     const products: RealProduct[] = aiProducts.map((product: any, index: number) => {
       return {
         ...product,
         id: product.id || `product-${index + 1}`,
-        image: getProductImageUrl(product.name, category),
-        affiliateLinks: createProductLinks(product.name, product.price),
+        image: getProductImageUrl(product.name),
+        affiliateLinks: createProductLinks(product.name, product.price, query),
       }
     })
 
