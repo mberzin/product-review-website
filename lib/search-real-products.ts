@@ -1,5 +1,7 @@
 "use server"
 
+import { generateText } from "ai"
+
 export interface RealProduct {
   id: string
   name: string
@@ -473,13 +475,81 @@ function getCategoryData(query: string) {
 
 export async function searchRealProducts(query: string): Promise<RealProduct[]> {
   try {
-    console.log("[v0] Generating products for:", query)
-    const products = generateProductsForQuery(query)
-    console.log("[v0] Successfully generated", products.length, "products")
+    console.log("[v0] Searching for products using Groq AI:", query)
+
+    const { text } = await generateText({
+      model: "groq/llama-3.1-70b-versatile",
+      prompt: `You are a product research expert. Generate a JSON array of 10 realistic product recommendations for: "${query}"
+
+Each product should include:
+- id: unique identifier
+- name: full product name with brand and model
+- brand: manufacturer name
+- price: realistic price in USD (number)
+- rating: rating out of 5 (number between 3.5 and 5.0)
+- reviewCount: number of reviews (number between 100 and 5000)
+- summary: 2-3 sentence product description
+- pros: array of 4-5 positive features
+- cons: array of 2-3 drawbacks
+- keyFeatures: array of 5-7 technical specifications
+
+Important:
+- Use real brand names appropriate for the product category
+- Prices should be realistic for the product type
+- Include variety in brands, prices, and features
+- Make the data realistic and helpful for comparison
+
+Return ONLY valid JSON array, no markdown formatting or explanation.`,
+      temperature: 0.7,
+    })
+
+    console.log("[v0] Groq AI response received")
+
+    // Parse the AI response
+    const aiProducts = JSON.parse(text)
+
+    const products: RealProduct[] = aiProducts.map((product: any, index: number) => {
+      const amazonAsin = `B0${Math.random().toString(36).substring(2, 9).toUpperCase()}`
+      const walmartId = Math.floor(Math.random() * 900000000) + 100000000
+
+      const amazonAffiliateId = process.env.AMAZON_AFFILIATE_ID || "youraffid-20"
+      const walmartAffiliateId = process.env.WALMART_AFFILIATE_ID || ""
+
+      let walmartUrl = `https://www.walmart.com/ip/${walmartId}`
+      if (walmartAffiliateId) {
+        walmartUrl += `?affcamid=${walmartAffiliateId}`
+      }
+
+      return {
+        ...product,
+        id: product.id || `product-${index + 1}`,
+        image: `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(product.name)}`,
+        affiliateLinks: [
+          {
+            vendor: "Amazon",
+            url: `https://www.amazon.com/dp/${amazonAsin}?tag=${amazonAffiliateId}`,
+            price: product.price,
+          },
+          {
+            vendor: "Walmart",
+            url: walmartUrl,
+            price: Math.floor(product.price * 0.95),
+          },
+          {
+            vendor: "Best Buy",
+            url: `https://www.bestbuy.com/site/${walmartId}.p`,
+            price: Math.floor(product.price * 1.02),
+          },
+        ],
+      }
+    })
+
+    console.log("[v0] Successfully generated", products.length, "products with AI")
     return products
   } catch (error) {
-    console.error("[v0] Error generating products:", error)
-    // Return empty array as last resort
-    return []
+    console.error("[v0] Error using Groq AI, falling back to mock data:", error)
+    const products = generateProductsForQuery(query)
+    console.log("[v0] Using fallback mock data:", products.length, "products")
+    return products
   }
 }
