@@ -22,7 +22,7 @@ An AI-powered product review website that searches the web for real products and
 1. User enters a product search query (e.g., "golf bags", "wireless headphones", "sunglasses")
 2. AI searches the web for real products matching the query
 3. System extracts product details, prices, ratings, and URLs from major retailers
-4. Generates affiliate links with your tracking codes (not implemented)
+4. Generates affiliate links with your tracking codes
 5. Displays top 10 products with comprehensive reviews and filtering options
 
 ## Setup

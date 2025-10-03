@@ -22,94 +22,12 @@ export interface RealProduct {
 }
 
 function getProductImageUrl(productName: string): string {
-  const query = encodeURIComponent(productName)
-  return `/placeholder.svg?height=400&width=400&query=${query}`
-}
-
-function getVendorsForCategory(query: string): string[] {
-  const queryLower = query.toLowerCase()
-
-  // Electronics - all three vendors
-  if (
-    queryLower.includes("laptop") ||
-    queryLower.includes("phone") ||
-    queryLower.includes("headphone") ||
-    queryLower.includes("tablet") ||
-    queryLower.includes("camera") ||
-    queryLower.includes("tv") ||
-    queryLower.includes("speaker") ||
-    queryLower.includes("smartwatch")
-  ) {
-    return ["Amazon", "Walmart", "Best Buy"]
-  }
-
-  // Appliances - all three vendors
-  if (
-    queryLower.includes("coffee") ||
-    queryLower.includes("blender") ||
-    queryLower.includes("microwave") ||
-    queryLower.includes("vacuum") ||
-    queryLower.includes("air fryer")
-  ) {
-    return ["Amazon", "Walmart", "Best Buy"]
-  }
-
-  // Sporting goods - Amazon and Walmart only (Best Buy doesn't sell sports equipment)
-  if (
-    queryLower.includes("golf") ||
-    queryLower.includes("running") ||
-    queryLower.includes("fitness") ||
-    queryLower.includes("yoga") ||
-    queryLower.includes("tennis") ||
-    queryLower.includes("basketball") ||
-    queryLower.includes("soccer")
-  ) {
-    return ["Amazon", "Walmart"]
-  }
-
-  // Fashion/accessories - Amazon and Walmart only
-  if (
-    queryLower.includes("sunglasses") ||
-    queryLower.includes("watch") ||
-    queryLower.includes("bag") ||
-    queryLower.includes("backpack") ||
-    queryLower.includes("clothing") ||
-    (queryLower.includes("shoes") && !queryLower.includes("running"))
-  ) {
-    return ["Amazon", "Walmart"]
-  }
-
-  // Default to Amazon and Walmart for unknown categories
-  return ["Amazon", "Walmart"]
-}
-
-function createProductLinks(productName: string, basePrice: number, query: string) {
-  const encodedName = encodeURIComponent(productName)
-  const vendors = getVendorsForCategory(query)
-
-  const allVendorLinks = {
-    Amazon: {
-      vendor: "Amazon",
-      url: `https://www.amazon.com/s?k=${encodedName}`,
-      price: basePrice,
-    },
-    Walmart: {
-      vendor: "Walmart",
-      url: `https://www.walmart.com/search?q=${encodedName}`,
-      price: Math.floor(basePrice * 0.95),
-    },
-    "Best Buy": {
-      vendor: "Best Buy",
-      url: `https://www.bestbuy.com/site/searchpage.jsp?st=${encodedName}`,
-      price: Math.floor(basePrice * 1.02),
-    },
-  }
-
-  return vendors.map((vendor) => allVendorLinks[vendor as keyof typeof allVendorLinks])
+  const encodedName = encodeURIComponent(productName.substring(0, 30))
+  return `https://via.placeholder.com/400x400/e5e7eb/6b7280.png?text=${encodedName}`
 }
 
 function generateProductsForQuery(query: string): RealProduct[] {
-  console.log("[v0] Generating products for query:", query)
+  console.log("[v0] Generating fallback products for query:", query)
 
   const queryLower = query.toLowerCase()
   const categoryData = getCategoryData(queryLower)
@@ -126,6 +44,12 @@ function generateProductsForQuery(query: string): RealProduct[] {
 
     const productName = categoryData.productNames[i % categoryData.productNames.length]
 
+    const affiliateLinks = categoryData.vendors.map((vendor, idx) => ({
+      vendor: vendor.name,
+      url: vendor.searchUrl.replace("{query}", encodeURIComponent(productName)),
+      price: idx === 0 ? basePrice : Math.floor(basePrice * (0.95 + Math.random() * 0.1)),
+    }))
+
     products.push({
       id: `product-${i + 1}`,
       name: productName,
@@ -138,7 +62,7 @@ function generateProductsForQuery(query: string): RealProduct[] {
       pros: categoryData.pros.slice(i % 3, (i % 3) + 4),
       cons: categoryData.cons.slice(i % 2, (i % 2) + 3),
       keyFeatures: categoryData.features.slice(i % 2, (i % 2) + 5),
-      affiliateLinks: createProductLinks(productName, basePrice, query),
+      affiliateLinks: affiliateLinks,
     })
   }
 
@@ -151,6 +75,11 @@ function getCategoryData(query: string) {
       productType: "Wireless Headphones",
       brands: ["Sony", "Bose", "Apple", "Sennheiser", "JBL", "Beats", "Audio-Technica", "Anker", "Jabra", "Samsung"],
       priceRange: { min: 49, max: 399 },
+      vendors: [
+        { name: "Amazon", searchUrl: "https://www.amazon.com/s?k={query}" },
+        { name: "Best Buy", searchUrl: "https://www.bestbuy.com/site/searchpage.jsp?st={query}" },
+        { name: "B&H Photo", searchUrl: "https://www.bhphotovideo.com/c/search?q={query}" },
+      ],
       productNames: [
         "Sony WH-1000XM5",
         "Bose QuietComfort Ultra",
@@ -193,6 +122,11 @@ function getCategoryData(query: string) {
       productType: "Laptop",
       brands: ["Apple", "Dell", "HP", "Lenovo", "ASUS", "Acer", "Microsoft", "MSI", "Razer", "LG"],
       priceRange: { min: 599, max: 2499 },
+      vendors: [
+        { name: "Best Buy", searchUrl: "https://www.bestbuy.com/site/searchpage.jsp?st={query}" },
+        { name: "B&H Photo", searchUrl: "https://www.bhphotovideo.com/c/search?q={query}" },
+        { name: "Newegg", searchUrl: "https://www.newegg.com/p/pl?d={query}" },
+      ],
       productNames: [
         "Apple MacBook Pro 14",
         "Dell XPS 15",
@@ -240,6 +174,11 @@ function getCategoryData(query: string) {
       productType: "Smartphone",
       brands: ["Apple", "Samsung", "Google", "OnePlus", "Motorola", "Xiaomi", "OPPO", "Sony", "Nokia", "ASUS"],
       priceRange: { min: 299, max: 1299 },
+      vendors: [
+        { name: "Amazon", searchUrl: "https://www.amazon.com/s?k={query}" },
+        { name: "Best Buy", searchUrl: "https://www.bestbuy.com/site/searchpage.jsp?st={query}" },
+        { name: "B&H Photo", searchUrl: "https://www.bhphotovideo.com/c/search?q={query}" },
+      ],
       productNames: [
         "Apple iPhone 15 Pro Max",
         "Samsung Galaxy S24 Ultra",
@@ -293,6 +232,11 @@ function getCategoryData(query: string) {
         "Bag Boy",
       ],
       priceRange: { min: 89, max: 399 },
+      vendors: [
+        { name: "Dick's Sporting Goods", searchUrl: "https://www.dickssportinggoods.com/search?searchTerm={query}" },
+        { name: "Golf Galaxy", searchUrl: "https://www.golfgalaxy.com/search?searchTerm={query}" },
+        { name: "PGA Tour Superstore", searchUrl: "https://www.pgatoursuperstore.com/search?q={query}" },
+      ],
       productNames: [
         "Callaway Fairway 14 Stand Bag",
         "TaylorMade FlexTech Crossover",
@@ -346,6 +290,11 @@ function getCategoryData(query: string) {
         "Spy",
       ],
       priceRange: { min: 79, max: 399 },
+      vendors: [
+        { name: "Sunglass Hut", searchUrl: "https://www.sunglasshut.com/us/search?q={query}" },
+        { name: "Amazon", searchUrl: "https://www.amazon.com/s?k={query}" },
+        { name: "LensCrafters", searchUrl: "https://www.lenscrafters.com/lc-us/search?text={query}" },
+      ],
       productNames: [
         "Ray-Ban Aviator Classic",
         "Oakley Holbrook",
@@ -399,6 +348,11 @@ function getCategoryData(query: string) {
         "Under Armour",
       ],
       priceRange: { min: 89, max: 249 },
+      vendors: [
+        { name: "Dick's Sporting Goods", searchUrl: "https://www.dickssportinggoods.com/search?searchTerm={query}" },
+        { name: "Foot Locker", searchUrl: "https://www.footlocker.com/search?query={query}" },
+        { name: "Road Runner Sports", searchUrl: "https://www.roadrunnersports.com/search?q={query}" },
+      ],
       productNames: [
         "Nike Air Zoom Pegasus 40",
         "Adidas Ultraboost 23",
@@ -452,6 +406,11 @@ function getCategoryData(query: string) {
         "Bonavita",
       ],
       priceRange: { min: 49, max: 399 },
+      vendors: [
+        { name: "Williams Sonoma", searchUrl: "https://www.williams-sonoma.com/search/results.html?words={query}" },
+        { name: "Sur La Table", searchUrl: "https://www.surlatable.com/search?q={query}" },
+        { name: "Crate & Barrel", searchUrl: "https://www.crateandbarrel.com/search?query={query}" },
+      ],
       productNames: [
         "Breville Barista Express",
         "Cuisinart DCC-3200P1",
@@ -507,6 +466,11 @@ function getCategoryData(query: string) {
       "LeaderCo",
     ],
     priceRange: { min: 49, max: 299 },
+    vendors: [
+      { name: "Amazon", searchUrl: "https://www.amazon.com/s?k={query}" },
+      { name: "Walmart", searchUrl: "https://www.walmart.com/search?q={query}" },
+      { name: "Target", searchUrl: "https://www.target.com/s?searchTerm={query}" },
+    ],
     productNames: [
       "Premium Pro Model X1",
       "Elite Series 2024",
@@ -548,18 +512,18 @@ export async function searchRealProducts(query: string): Promise<RealProduct[]> 
   try {
     console.log("[v0] Searching for products using Groq AI:", query)
 
-    const vendors = getVendorsForCategory(query)
-    const vendorList = vendors.join(", ")
-
     const { text } = await generateText({
       model: "groq/llama-3.1-70b-versatile",
       prompt: `You are a product research expert with knowledge of current products available in 2024-2025. Generate a JSON array of 10 realistic product recommendations for: "${query}"
 
-IMPORTANT: Use actual current product model names that exist in the market (e.g., "Apple iPhone 15 Pro Max", "Samsung Galaxy S24 Ultra", "Sony WH-1000XM5", not generic names like "Apple Smartphone Pro" or "Sony Headphones Elite").
+IMPORTANT REQUIREMENTS:
+1. Use actual current product model names that exist in the market (e.g., "Apple iPhone 15 Pro Max", "Samsung Galaxy S24 Ultra", "Sony WH-1000XM5")
+2. For each product, determine the TOP 3 most appropriate retailers/vendors that actually sell this type of product
+3. Generate realistic vendor-specific URLs and prices
 
 Each product should include:
 - id: unique identifier (string)
-- name: ACTUAL full product name with real brand and specific model number/name (e.g., "Apple iPhone 15 Pro Max", not "Apple Smartphone Pro")
+- name: ACTUAL full product name with real brand and specific model number/name
 - brand: manufacturer name (string)
 - price: realistic current market price in USD (number)
 - rating: rating out of 5 (number between 3.5 and 5.0)
@@ -568,14 +532,28 @@ Each product should include:
 - pros: array of 4-5 specific positive features
 - cons: array of 2-3 realistic drawbacks
 - keyFeatures: array of 5-7 specific technical specifications
+- affiliateLinks: array of 3 vendor objects, each with:
+  - vendor: name of the retailer (e.g., "Dick's Sporting Goods", "Golf Galaxy", "Best Buy", "Williams Sonoma", etc.)
+  - url: actual search URL for that vendor's website (use real domain names)
+  - price: price at that vendor (vary slightly between vendors)
 
-Requirements:
-- Use REAL product model names that currently exist (2024-2025 models)
-- Use actual brand names appropriate for the product category
-- Prices should reflect current market prices
-- Include variety in brands, prices, and features
-- Make the data realistic and helpful for comparison shopping
-- These products should be available at: ${vendorList}
+VENDOR SELECTION GUIDELINES:
+- Golf equipment: Dick's Sporting Goods, Golf Galaxy, PGA Tour Superstore
+- Running shoes: Dick's Sporting Goods, Foot Locker, Road Runner Sports
+- Electronics: Best Buy, B&H Photo, Newegg or Amazon
+- Coffee makers: Williams Sonoma, Sur La Table, Crate & Barrel
+- Sunglasses: Sunglass Hut, LensCrafters, Amazon
+- General products: Amazon, Walmart, Target
+
+Use actual retailer domain names in URLs:
+- Dick's Sporting Goods: https://www.dickssportinggoods.com/search?searchTerm=PRODUCT_NAME
+- Golf Galaxy: https://www.golfgalaxy.com/search?searchTerm=PRODUCT_NAME
+- Best Buy: https://www.bestbuy.com/site/searchpage.jsp?st=PRODUCT_NAME
+- Williams Sonoma: https://www.williams-sonoma.com/search/results.html?words=PRODUCT_NAME
+- Foot Locker: https://www.footlocker.com/search?query=PRODUCT_NAME
+- Amazon: https://www.amazon.com/s?k=PRODUCT_NAME
+- Walmart: https://www.walmart.com/search?q=PRODUCT_NAME
+- Target: https://www.target.com/s?searchTerm=PRODUCT_NAME
 
 Return ONLY a valid JSON array with no markdown formatting, code blocks, or explanation.`,
       temperature: 0.7,
@@ -583,14 +561,33 @@ Return ONLY a valid JSON array with no markdown formatting, code blocks, or expl
 
     console.log("[v0] Groq AI response received")
 
-    const aiProducts = JSON.parse(text)
+    let jsonText = text.trim()
+
+    // Remove markdown code blocks if present
+    if (jsonText.startsWith("```")) {
+      const lines = jsonText.split("\n")
+      lines.shift() // Remove opening \`\`\`json or \`\`\`
+      if (lines[lines.length - 1].trim() === "```") {
+        lines.pop() // Remove closing \`\`\`
+      }
+      jsonText = lines.join("\n").trim()
+    }
+
+    // Try to extract JSON array if wrapped in other text
+    const arrayMatch = jsonText.match(/\[\s*\{[\s\S]*\}\s*\]/)
+    if (arrayMatch) {
+      jsonText = arrayMatch[0]
+    }
+
+    const aiProducts = JSON.parse(jsonText)
 
     const products: RealProduct[] = aiProducts.map((product: any, index: number) => {
       return {
         ...product,
         id: product.id || `product-${index + 1}`,
         image: getProductImageUrl(product.name),
-        affiliateLinks: createProductLinks(product.name, product.price, query),
+        // Use AI-generated affiliate links if available, otherwise generate them
+        affiliateLinks: product.affiliateLinks || [],
       }
     })
 
