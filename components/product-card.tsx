@@ -10,7 +10,7 @@ interface ProductCardProps {
     price: number
     rating: number
     reviewCount: number
-    image: string
+    image: string // Keeping image property in interface for easy re-implementation
     summary: string
     pros: string[]
     cons: string[]
@@ -34,18 +34,18 @@ export function ProductCard({ product, rank }: ProductCardProps) {
           </div>
         </div>
 
-        {/* Product Image */}
+        {/* 
         <div className="w-full md:w-48 h-48 bg-muted rounded-lg overflow-hidden shrink-0">
           <img
             src={product.image || "/placeholder.svg"}
             alt={product.name}
             className="w-full h-full object-cover"
             onError={(e) => {
-              // Fallback to a generic placeholder if image fails to load
               e.currentTarget.src = `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(product.name)}`
             }}
           />
         </div>
+        */}
 
         {/* Product Details */}
         <div className="flex-1 space-y-4">
