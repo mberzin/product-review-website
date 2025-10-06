@@ -21,14 +21,61 @@ export interface RealProduct {
   }[]
 }
 
-function getProductImageUrl(productName: string): string {
-  // Create a simple hash from the product name for consistent images
-  const seed = productName
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "")
-    .substring(0, 20)
-  // Lorem Picsum provides reliable stock photos with consistent results based on seed
-  return `https://picsum.photos/seed/${seed}/400/400`
+function getProductImageUrl(productName: string, query: string): string {
+  // Extract product type from the search query to create a descriptive image query
+  const productType = extractProductType(query)
+  // Create a descriptive query that includes brand and product type
+  const imageQuery = `${productName} ${productType}`.trim()
+  // Use Next.js placeholder.svg with specific product description for relevant images
+  return `/placeholder.svg?height=400&width=400&query=${encodeURIComponent(imageQuery)}`
+}
+
+function extractProductType(query: string): string {
+  const queryLower = query.toLowerCase()
+
+  if (queryLower.includes("headphone") || queryLower.includes("earbuds") || queryLower.includes("airpods")) {
+    return "wireless headphones"
+  }
+  if (queryLower.includes("laptop") || queryLower.includes("notebook")) {
+    return "laptop computer"
+  }
+  if (
+    queryLower.includes("phone") ||
+    queryLower.includes("smartphone") ||
+    queryLower.includes("iphone") ||
+    queryLower.includes("android")
+  ) {
+    return "smartphone"
+  }
+  if (queryLower.includes("golf") && (queryLower.includes("bag") || queryLower.includes("bags"))) {
+    return "golf bag"
+  }
+  if (queryLower.includes("golf") && (queryLower.includes("club") || queryLower.includes("clubs"))) {
+    return "golf clubs"
+  }
+  if (queryLower.includes("sunglasses") || queryLower.includes("shades")) {
+    return "sunglasses"
+  }
+  if (queryLower.includes("running") && queryLower.includes("shoe")) {
+    return "running shoes"
+  }
+  if (queryLower.includes("coffee") && (queryLower.includes("maker") || queryLower.includes("machine"))) {
+    return "coffee maker"
+  }
+  if (queryLower.includes("watch")) {
+    return "smartwatch"
+  }
+  if (queryLower.includes("camera")) {
+    return "camera"
+  }
+  if (queryLower.includes("tablet")) {
+    return "tablet"
+  }
+  if (queryLower.includes("speaker")) {
+    return "speaker"
+  }
+
+  return ""
 }
 
 function generateProductsForQuery(query: string): RealProduct[] {
@@ -62,7 +109,7 @@ function generateProductsForQuery(query: string): RealProduct[] {
       price: basePrice,
       rating: rating,
       reviewCount: reviewCount,
-      image: getProductImageUrl(productName),
+      image: getProductImageUrl(productName, query),
       summary: categoryData.summaryTemplate.replace("{brand}", brand).replace("{product}", categoryData.productType),
       pros: categoryData.pros.slice(i % 3, (i % 3) + 4),
       cons: categoryData.cons.slice(i % 2, (i % 2) + 3),
@@ -279,6 +326,61 @@ function getCategoryData(query: string) {
     }
   }
 
+  if (query.includes("golf") && (query.includes("club") || query.includes("clubs"))) {
+    return {
+      productType: "Golf Clubs",
+      brands: [
+        "Callaway",
+        "TaylorMade",
+        "Titleist",
+        "Ping",
+        "Sun Mountain",
+        "Cobra",
+        "Mizuno",
+        "Wilson",
+        "Cleveland",
+        "Bag Boy",
+      ],
+      priceRange: { min: 299, max: 1299 },
+      vendors: [
+        { name: "Dick's Sporting Goods", searchUrl: "https://www.dickssportinggoods.com/search?searchTerm={query}" },
+        { name: "Golf Galaxy", searchUrl: "https://www.golfgalaxy.com/search?searchTerm={query}" },
+        { name: "PGA Tour Superstore", searchUrl: "https://www.pgatoursuperstore.com/search?q={query}" },
+      ],
+      productNames: [
+        "Callaway Rogue X Driver",
+        "TaylorMade SIM Driver",
+        "Titleist Vokey SM6 Wedge",
+        "Ping G30 Driver",
+        "Sun Mountain 3-Piece Set",
+        "Cobra Golf RX Driver",
+        "Mizuno FG75 Driver",
+        "Wilson Staff X Driver",
+        "Cleveland Launcher Driver",
+        "Bag Boy Golf Club Set",
+      ],
+      summaryTemplate:
+        "High-quality {product} from {brand} offering precision, durability, and advanced technology. Ideal for professional golfers.",
+      pros: [
+        "High precision",
+        "Durable construction",
+        "Advanced technology",
+        "Comfortable grip",
+        "Long-lasting performance",
+        "Excellent value for money",
+      ],
+      cons: ["Heavy weight", "Limited customization", "Expensive", "May require fitting"],
+      features: [
+        "Forged steel shaft",
+        "Carbon fiber club head",
+        "Adjustable loft settings",
+        "Soft rubber grip",
+        "Weighted club head",
+        "Tour-proven design",
+      ],
+    }
+  }
+
   if (query.includes("sunglasses") || query.includes("shades")) {
     return {
       productType: "Sunglasses",
@@ -452,6 +554,192 @@ function getCategoryData(query: string) {
     }
   }
 
+  if (query.includes("watch") || query.includes("smartwatch")) {
+    return {
+      productType: "Smartwatch",
+      brands: ["Apple", "Samsung", "Fitbit", "Garmin", "Huawei", "Fitbit", "Garmin", "Huawei", "Apple", "Samsung"],
+      priceRange: { min: 149, max: 799 },
+      vendors: [
+        { name: "Amazon", searchUrl: "https://www.amazon.com/s?k={query}" },
+        { name: "Best Buy", searchUrl: "https://www.bestbuy.com/site/searchpage.jsp?st={query}" },
+        { name: "Walmart", searchUrl: "https://www.walmart.com/search?q={query}" },
+      ],
+      productNames: [
+        "Apple Watch Ultra",
+        "Samsung Galaxy Watch 5",
+        "Fitbit Versa 4",
+        "Garmin Fenix 7",
+        "Huawei Watch GT 3",
+        "Fitbit Sense 3",
+        "Garmin Venu 3",
+        "Huawei Watch GT 2",
+        "Apple Watch Series 8",
+        "Samsung Galaxy Watch 4",
+      ],
+      summaryTemplate:
+        "Advanced {product} from {brand} offering health tracking, smart notifications, and stylish design. Perfect for fitness enthusiasts and tech-savvy users.",
+      pros: [
+        "Accurate health tracking",
+        "Smart notifications",
+        "Long battery life",
+        "Water-resistant",
+        "Stylish design",
+        "Built-in GPS",
+        "Compatible with various apps",
+      ],
+      cons: ["Expensive", "Limited watch face options", "May need charging daily", "Heavy"],
+      features: [
+        "Heart rate monitoring",
+        "Sleep tracking",
+        "GPS functionality",
+        "Water resistance",
+        "Built-in speaker",
+        "Touchscreen display",
+        "Multiple watch faces",
+        "Compatible with Apple ecosystem",
+      ],
+    }
+  }
+
+  if (query.includes("camera")) {
+    return {
+      productType: "Camera",
+      brands: ["Canon", "Nikon", "Sony", "Panasonic", "Fujifilm", "Leica", "GoPro", "Ricoh", "Olympus", "Pentax"],
+      priceRange: { min: 299, max: 1299 },
+      vendors: [
+        { name: "Amazon", searchUrl: "https://www.amazon.com/s?k={query}" },
+        { name: "Best Buy", searchUrl: "https://www.bestbuy.com/site/searchpage.jsp?st={query}" },
+        { name: "Walmart", searchUrl: "https://www.walmart.com/search?q={query}" },
+      ],
+      productNames: [
+        "Canon EOS R6",
+        "Nikon Z7 II",
+        "Sony A7 IV",
+        "Panasonic Lumix S5",
+        "Fujifilm X-T5",
+        "Leica M11",
+        "GoPro HERO 11",
+        "Ricoh GR III",
+        "Olympus OM-D E-M10 Mark IV",
+        "Pentax K-SP",
+      ],
+      summaryTemplate:
+        "Professional-grade {product} from {brand} featuring high-resolution sensors, advanced features, and excellent image quality. Perfect for photography enthusiasts.",
+      pros: [
+        "High-resolution sensor",
+        "Advanced features",
+        "Excellent image quality",
+        "Compact size",
+        "Durable build",
+        "Fast autofocus",
+        "Good battery life",
+      ],
+      cons: ["Expensive", "Heavy", "Limited video capabilities", "May require learning curve"],
+      features: [
+        "45.7MP sensor",
+        "20-bit A/D converter",
+        "5-axis in-body image stabilization",
+        "4K video recording",
+        "Wireless connectivity",
+        "Built-in GPS",
+        "Touchscreen display",
+        "Weather-sealed",
+      ],
+    }
+  }
+
+  if (query.includes("tablet")) {
+    return {
+      productType: "Tablet",
+      brands: ["Apple", "Samsung", "Google", "Microsoft", "Lenovo", "Huawei", "Amazon", "Xiaomi", "ZTE", "OnePlus"],
+      priceRange: { min: 299, max: 999 },
+      vendors: [
+        { name: "Amazon", searchUrl: "https://www.amazon.com/s?k={query}" },
+        { name: "Best Buy", searchUrl: "https://www.bestbuy.com/site/searchpage.jsp?st={query}" },
+        { name: "Walmart", searchUrl: "https://www.walmart.com/search?q={query}" },
+      ],
+      productNames: [
+        "Apple iPad Pro",
+        "Samsung Galaxy Tab S8",
+        "Google Pixel Slate",
+        "Microsoft Surface Pro 8",
+        "Lenovo Yoga Tab 3 Pro",
+        "Huawei MediaPad M6",
+        "Amazon Fire HD 10",
+        "Xiaomi Pad 5",
+        "ZTE Blade V20",
+        "OnePlus Nord Buds",
+      ],
+      summaryTemplate:
+        "Versatile {product} from {brand} offering powerful performance, long battery life, and high-resolution display. Perfect for work and entertainment.",
+      pros: [
+        "Powerful performance",
+        "Long battery life",
+        "High-resolution display",
+        "Stylish design",
+        "Good value for money",
+        "Portable",
+        "Lightweight",
+      ],
+      cons: ["Limited storage options", "May be too large for some users", "Expensive", "Limited ports"],
+      features: [
+        "12.9-inch Liquid Retina display",
+        "Apple M2 chip",
+        "8-core GPU",
+        "12MP Ultra Wide camera",
+        "10-hour battery life",
+        "Wi-Fi 6",
+        "Bluetooth 5.3",
+      ],
+    }
+  }
+
+  if (query.includes("speaker")) {
+    return {
+      productType: "Speaker",
+      brands: ["Bose", "JBL", "Sonos", "Beats", "Logitech", "Samsung", "Sony", "Amazon", "Google", "LG"],
+      priceRange: { min: 49, max: 399 },
+      vendors: [
+        { name: "Amazon", searchUrl: "https://www.amazon.com/s?k={query}" },
+        { name: "Best Buy", searchUrl: "https://www.bestbuy.com/site/searchpage.jsp?st={query}" },
+        { name: "Walmart", searchUrl: "https://www.walmart.com/search?q={query}" },
+      ],
+      productNames: [
+        "Bose Soundlink Revolve+",
+        "JBL Flip 6",
+        "Sonos One",
+        "Beats Pill+",
+        "Logitech Z337",
+        "Samsung HW-QN950BT",
+        "Sony SRS-XB35",
+        "Amazon Echo Dot (4th Gen)",
+        "Google Nest Audio",
+        "LG SmartThinQ Soundbar",
+      ],
+      summaryTemplate:
+        "Portable {product} from {brand} offering high-quality sound, wireless connectivity, and convenient design. Perfect for home entertainment.",
+      pros: [
+        "High-quality sound",
+        "Wireless connectivity",
+        "Portable design",
+        "Stylish appearance",
+        "Good battery life",
+        "Easy to set up",
+        "Smart home integration",
+      ],
+      cons: ["Limited range", "May not be suitable for large rooms", "Premium price", "No wired option"],
+      features: [
+        "Bluetooth 5.3",
+        "360-degree sound",
+        "Water-resistant",
+        "Built-in microphone",
+        "Voice assistant support",
+        "Compact size",
+        "Good bass response",
+      ],
+    }
+  }
+
   return {
     productType: query
       .split(" ")
@@ -570,9 +858,9 @@ Return ONLY a valid JSON array with no markdown formatting, code blocks, or expl
     // Remove markdown code blocks if present
     if (jsonText.startsWith("```")) {
       const lines = jsonText.split("\n")
-      lines.shift() // Remove opening \`\`\`json or \`\`\`
+      lines.shift()
       if (lines[lines.length - 1].trim() === "```") {
-        lines.pop() // Remove closing \`\`\`
+        lines.pop()
       }
       jsonText = lines.join("\n").trim()
     }
@@ -590,8 +878,7 @@ Return ONLY a valid JSON array with no markdown formatting, code blocks, or expl
       return {
         ...product,
         id: product.id || `product-${index + 1}`,
-        image: getProductImageUrl(product.name),
-        // Use AI-generated affiliate links if available, otherwise generate them
+        image: getProductImageUrl(product.name, query),
         affiliateLinks: product.affiliateLinks || [],
       }
     })
