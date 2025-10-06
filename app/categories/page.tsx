@@ -150,6 +150,9 @@ export default function CategoriesPage() {
             <a href="/categories" className="text-sm text-foreground font-medium">
               Categories
             </a>
+            <a href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              About
+            </a>
           </nav>
         </div>
       </header>

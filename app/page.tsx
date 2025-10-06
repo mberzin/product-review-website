@@ -34,6 +34,9 @@ export default function HomePage() {
             <a href="/categories" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Categories
             </a>
+            <a href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              About
+            </a>
           </nav>
         </div>
       </header>
