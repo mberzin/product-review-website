@@ -22,8 +22,13 @@ export interface RealProduct {
 }
 
 function getProductImageUrl(productName: string): string {
-  const encodedName = encodeURIComponent(productName.substring(0, 30))
-  return `https://via.placeholder.com/400x400/e5e7eb/6b7280.png?text=${encodedName}`
+  // Create a simple hash from the product name for consistent images
+  const seed = productName
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .substring(0, 20)
+  // Lorem Picsum provides reliable stock photos with consistent results based on seed
+  return `https://picsum.photos/seed/${seed}/400/400`
 }
 
 function generateProductsForQuery(query: string): RealProduct[] {
@@ -383,8 +388,7 @@ function getCategoryData(query: string) {
         "Durable rubber outsole",
         "Supportive midsole",
         "Padded collar",
-        "Reflective details",
-        "Removable insole",
+        "Spring hinges",
         "Flexible forefoot",
       ],
     }
@@ -573,10 +577,11 @@ Return ONLY a valid JSON array with no markdown formatting, code blocks, or expl
       jsonText = lines.join("\n").trim()
     }
 
-    // Try to extract JSON array if wrapped in other text
-    const arrayMatch = jsonText.match(/\[\s*\{[\s\S]*\}\s*\]/)
-    if (arrayMatch) {
-      jsonText = arrayMatch[0]
+    // Try to find the start and end of JSON array
+    const startIndex = jsonText.indexOf("[")
+    const endIndex = jsonText.lastIndexOf("]")
+    if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+      jsonText = jsonText.substring(startIndex, endIndex + 1)
     }
 
     const aiProducts = JSON.parse(jsonText)
